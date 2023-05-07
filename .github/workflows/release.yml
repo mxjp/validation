@@ -1,7 +1,8 @@
-name: Test
+name: Release
 
 on:
-  push
+  push:
+    branches: release
 
 jobs:
   test:
@@ -11,5 +12,9 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 20.x
+        registry-url: https://registry.npmjs.org/
+        scope: mpt
     - run: npm ci
     - run: npm test
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

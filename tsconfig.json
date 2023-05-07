@@ -3,6 +3,7 @@
 		"target": "esnext",
 		"module": "esnext",
 		"moduleResolution": "classic",
+		"declaration": true,
 		"strict": true,
 		"rootDir": "./src",
 		"outDir": "./dist"

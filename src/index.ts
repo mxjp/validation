@@ -346,47 +346,50 @@ export function equals<T>(value: T, messageSource?: MessageSource<T>): Parser<T,
 	};
 }
 
-/**
- * An object that defines parsers for specific properties.
- */
-export type ObjectParser = Record<string, Parser<any>>;
+type HasUndefined<T> = string extends (T extends undefined ? string : number) ? true : false;
+type OptionalObjectParserInputs<T> = { [K in keyof T]-?: HasUndefined<ParserInput<T[K]>> extends true ? K : never }[keyof T];
+type RequiredObjectParserInputs<T> = { [K in keyof T]-?: HasUndefined<ParserInput<T[K]>> extends true ? never : K }[keyof T];
 
 /**
  * Helper to get the input type of an object parser.
  */
-export type ObjectParserInput<T> = { [K in keyof T]: ParserInput<T[K]> };
+export type ObjectParserInput<T> = {
+	[K in OptionalObjectParserInputs<T>]?: ParserInput<T[K]>;
+} & {
+	[K in RequiredObjectParserInputs<T>]-?: ParserInput<T[K]>;
+};
 
 /**
  * Helper to get the output type of an object parser.
  */
-export type ObjectParserOutput<T> = { [K in keyof T]: ParserOutput<T[K]> };
+export type ObjectParserOutput<T> = { [K in keyof T]-?: ParserOutput<T[K]> };
 
 /**
  * Create a parser that accepts objects with specific properties.
  *
- * @param parser An object with parsers for each supported property.
+ * @param parsers An object with parsers for each supported property.
  * @param ignoreUnknown If true, unknown properties are ignored. Else an error is thrown if there are unknown properties.
  *
  * @example
  * ```ts
  * object({
- *   foo: string(),
+ *   foo: optional(string()),
  *   bar: number(0, 42),
  * })
  * ```
  */
-export function object<T extends ObjectParser>(parser: T, ignoreUnknown = false): Parser<ObjectParserInput<T>, ObjectParserOutput<T>> {
+export function object<T extends Record<keyof any, Parser<any>>>(parsers: T, ignoreUnknown = false): Parser<ObjectParserInput<T>, ObjectParserOutput<T>> {
 	return (input, path) => {
 		if (input === null || typeof input !== "object") {
 			throw new ParserError(path, `${formatPath(path)} must be an object`);
 		}
 		const output = {} as ObjectParserOutput<T>;
-		for (const key in parser) {
-			output[key] = parser[key](input[key], path.concat(key));
+		for (const key in parsers) {
+			output[key] = parsers[key]((input as any)[key], path.concat(key));
 		}
 		if (!ignoreUnknown) {
 			for (const key in input) {
-				if (!Object.hasOwn(parser, key)) {
+				if (!Object.hasOwn(parsers, key)) {
 					const subPath = path.concat(key);
 					throw new ParserError(subPath, `${formatPath(subPath)} is not supported`);
 				}

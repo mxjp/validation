@@ -6,8 +6,10 @@
 	"main": "./dist/index.js",
 	"sideEffects": false,
 	"scripts": {
-		"build": "tsc",
-		"test": "tsc -p tsconfig-test.json && node --test ./test-out/test/",
+		"build": "tsc -p tsconfig-build.json",
+		"test:runtime": "tsc -p tsconfig-test.json && node --test ./test-out/test/",
+		"test:types": "tsc -p tsconfig-test-types.json",
+		"test": "npm run test:runtime && npm run test:types",
 		"start": "concurrently \"tsc -p tsconfig-test.json -w\" \"node --test --watch ./test-out/test/\"",
 		"prepack": "npm test && npm run build"
 	},

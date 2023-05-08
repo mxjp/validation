@@ -2,13 +2,13 @@
 	"compilerOptions": {
 		"target": "esnext",
 		"module": "esnext",
-		"moduleResolution": "classic",
+		"moduleResolution": "node",
 		"declaration": true,
-		"strict": true,
-		"rootDir": "./src",
-		"outDir": "./dist"
+		"strict": true
 	},
 	"include": [
-		"./src"
+		"./src",
+		"./test",
+		"./test-types"
 	]
 }

@@ -146,6 +146,18 @@ export function map<I, O>(map: Map<I, O>, messageSource?: MessageSource<I>): Par
 }
 
 /**
+ * Create a parser that uses a set to check if an input is valid.
+ */
+export function set<T>(set: Set<T>, messageSource?: MessageSource<T>): Parser<T> {
+	return (input, path) => {
+		if (!set.has(input)) {
+			throw new ParserError(path, getErrorMessage(messageSource, input, path) ?? `${formatPath(path)} is an unknown value`);
+		}
+		return input;
+	};
+}
+
+/**
  * Create a parser that passes a value through multiple parsers.
  *
  * @example

@@ -66,6 +66,21 @@ await test(lib.map.name, () => {
 	tester.valid("none", undefined);
 });
 
+await test(lib.set.name, () => {
+	const obj = {};
+	const set = new Set([
+		"foo",
+		obj,
+		undefined,
+	]);
+
+	const tester = new ParserTester(lib.set(set), "\"test\" is an unknown value");
+	tester.invalid("baz");
+	tester.valid("foo");
+	tester.valid(obj);
+	tester.valid(undefined);
+});
+
 await test(lib.pipe.name, () => {
 	const add = (input: number) => input + 1;
 	strictEqual(lib.pipe()("any", []), "any");

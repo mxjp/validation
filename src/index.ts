@@ -183,19 +183,36 @@ export function pipe(...parsers: Parser<any>[]): Parser<any> {
  * Create a parser that accepts undefined.
  *
  * @param inner The parser to use if the input is not undefined.
- * @param getDefault A function that returns the default value if the input is undefined.
+ * @param getDefault A function that returns the default output if the input is undefined.
  *
  * @example
  * ```ts
  * optional(string()) // All strings and undefined
- * optional(string(), () => "example") // All strings, returns "example" for undefined.
+ * optional(string(), () => "example") // All strings, returns "example" if the input is undefined.
  * ```
  */
 export function optional<I, O>(inner: Parser<I, O>): Parser<I | undefined, O | undefined>;
-export function optional<I, O>(inner: Parser<I, O>, getDefault: () => O): Parser<I | undefined, O>;
-export function optional<I, O>(inner: Parser<I, O>, getDefault?: () => O): Parser<I | undefined, O | undefined> {
+export function optional<I, O>(inner: Parser<I, O>, getDefault: Parser<undefined, O>): Parser<I | undefined, O>;
+export function optional<I, O>(inner: Parser<I, O>, getDefault?: Parser<undefined, O>): Parser<I | undefined, O | undefined> {
 	return (input, path) => {
-		return input === undefined ? getDefault?.() : inner(input, path);
+		return input === undefined ? getDefault?.(undefined, path) : inner(input, path);
+	};
+}
+
+/**
+ * Create a parser that supplies a default input value.
+ *
+ * @param inner The parser to use.
+ * @param getDefault A function that returns the default input if the input is undefined.
+ *
+ * @example
+ * ```ts
+ * parseOptional(isoDuration(), () => "PT0S") // Parses "PT0S" if the input is undefined.
+ * ```
+ */
+export function parseOptional<I, O>(inner: Parser<I, O>, getDefault: Parser<undefined, I>): Parser<I | undefined, O> {
+	return (input, path) => {
+		return inner(input === undefined ? getDefault(undefined, path) : input, path);
 	};
 }
 

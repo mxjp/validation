@@ -89,12 +89,28 @@ await test(lib.pipe.name, () => {
 });
 
 await test(lib.optional.name, () => {
-	const tester = new ParserTester(lib.optional(lib.string()), "\"test\" must be a string");
-	tester.invalid(0);
+	const tester = new ParserTester(lib.optional(TEST_NUM), "test");
+	tester.invalid("");
 	tester.invalid(null);
 	tester.invalid(false);
 	tester.valid(undefined);
-	tester.valid("foobar");
+	tester.valid(7, "test7");
+
+	const withDefault = new ParserTester(lib.optional(TEST_NUM, () => "foo"), "test");
+	withDefault.invalid("");
+	withDefault.invalid(null);
+	withDefault.invalid(false);
+	withDefault.valid(undefined, "foo");
+	withDefault.valid(7, "test7");
+});
+
+await test(lib.parseOptional.name, () => {
+	const tester = new ParserTester(lib.parseOptional(TEST_NUM, () => 42), "test");
+	tester.invalid("");
+	tester.invalid(null);
+	tester.invalid(false);
+	tester.valid(undefined, "test42");
+	tester.valid(7, "test7");
 });
 
 await test(lib.string.name, () => {
